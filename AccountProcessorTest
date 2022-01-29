@@ -1,0 +1,50 @@
+@isTest
+public class AccountProcessorTest {
+    
+    static testmethod void updateAccounts() {
+        List<Account> acctToInsert = new List<Account>();
+        for (Integer i = 0; i < 20; i++) {
+            acctToInsert.add(new Account(Name = 'Test'+i));
+        }
+        insert acctToInsert;
+        
+        List<Contact> conToInsert = new List<Contact>();
+        for(Account a : [SELECT ID FROM ACCOUNT LIMIT 20] ){
+            conToInsert.add(new Contact(AccountId = a.Id, LastName = 'Test', FirstName = 'First', Email = 'test@ye.com'));
+        }
+        
+        insert conToInsert;
+        List<Id> accIds = new List<Id>(new Map<Id,Account>([SELECT ID FROM ACCOUNT]).keySet());
+        Test.startTest();
+        AccountProcessor.countContacts(accIds);
+        Test.stopTest();
+        
+        for(Account a : [SELECT ID,Number_of_Contacts__c FROM ACCOUNT]) {
+            System.assertEquals(1, a.Number_of_Contacts__c);
+        }
+    }
+    
+    
+    static testmethod void donotUpdateAccounts() {
+        List<Account> acctToInsert = new List<Account>();
+        for (Integer i = 0; i < 20; i++) {
+            acctToInsert.add(new Account(Name = 'Test'+i));
+        }
+        insert acctToInsert;
+        
+        List<Contact> conToInsert = new List<Contact>();
+        for(Account a : [SELECT ID FROM ACCOUNT LIMIT 20] ){
+            conToInsert.add(new Contact( LastName = 'Test', FirstName = 'First', Email = 'test@ye.com'));
+        }
+        
+        insert conToInsert;
+        List<Id> accIds = new List<Id>(new Map<Id,Account>([SELECT ID FROM ACCOUNT]).keySet());
+        Test.startTest();
+        AccountProcessor.countContacts(accIds);
+        Test.stopTest();
+        
+        for(Account a : [SELECT ID,Number_of_Contacts__c FROM ACCOUNT]) {
+            System.assertEquals(0, a.Number_of_Contacts__c);
+        }
+    }
+}
