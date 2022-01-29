@@ -1,0 +1,27 @@
+@isTest
+public class AddPrimaryContactTest {
+    //method to create accounts based on a string param
+    //test method to call queueable apex with positive condition
+    //test method to call queueable with negative
+
+    static void createAccounts(String state) {
+        List<Account> accounts = new List<Account>();
+        for (Integer i =0; i < 50; i++) {
+            accounts.add( new Account(Name='Test' , BillingState = state) );
+        }
+        insert accounts;
+    }
+
+    static testMethod void contactRecordsforCA() {
+        createAccounts('NY');
+        createAccounts('CA');
+
+        AddPrimaryContact apc = new AddPrimaryContact(new Contact(LastName = 'Test',Email='test@ew.com'), 'CA');
+
+        Test.startTest();
+        System.enqueueJob(apc);
+        Test.stopTest();
+
+        System.assertEquals(50, [SELECT Count() FROM Contact WHERE LastName = 'Test']);
+    }
+}
