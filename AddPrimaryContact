@@ -1,0 +1,24 @@
+public class AddPrimaryContact implements Queueable {
+    private String abv;
+    private Contact con;
+    public AddPrimaryContact(Contact contact, String stateAbv) {
+        this.con = contact;
+        this.abv = stateAbv;
+    }
+    public void execute(QueueableContext c) {
+        List<Contact> contactsToInsert = new List<Contact>();
+        for (Account account : [
+            SELECT Name, Id, BillingState
+            FROM Account
+            WHERE BillingState = :abv LIMIT 200
+        ]
+        ) {
+            Contact addContact = con.clone(false,false,false,false);
+            contactsToInsert.add(addContact);
+        }
+        System.debug('did i insert' + contactsToInsert);
+        if(!contactsToInsert.isEmpty()) {
+            insert contactsToInsert;
+        }
+    }
+}
