@@ -1,0 +1,20 @@
+public class LeadProcessor implements Database.Batchable<SObject> {
+    public Database.QueryLocator start(Database.BatchableContext bc) {
+        return Database.getQueryLocator('SELECT ID,LEADSOURCE FROM LEAD');
+    }
+    
+    public void execute(Database.BatchableContext bc, List<Lead> leads) {
+        List<Lead> leadsToUpdate = new List<Lead>();
+        for (Lead l : leads) {
+            l.LeadSource = 'Dreamforce';
+            leadsToUpdate.add(l);
+        }
+        if(!leadsToUpdate.isEmpty()) {
+            update leadsToUpdate;            
+        }   
+    }
+    
+    public void finish(Database.BatchableContext bc) {
+        
+    }   
+}
