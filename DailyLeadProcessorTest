@@ -1,0 +1,21 @@
+@IsTest
+public class DailyLeadProcessorTest {
+    static void insertLeads() {
+        List<Lead> insertLeads = new List<Lead>();
+        for (Integer i =0; i < 200; i++) {
+            insertLeads.add(new Lead(LastName = 'test', Company ='Retailer'));
+        }
+        insert insertLeads;
+    }
+
+    static testMethod void scheduleLeadProcessor() {
+        insertLeads();
+        DailyLeadProcessor dlp = new DailyLeadProcessor();
+        Test.startTest();
+        System.schedule('DailyLeadProcessor', '0 0 12 * * ?', dlp );
+        Test.stopTest();
+        for (Lead l : [SELECT Id, LeadSource FROM Lead LIMIT 200]) {
+            System.assertEquals('Dreamforce',l.LeadSource);
+        }
+    }
+}
