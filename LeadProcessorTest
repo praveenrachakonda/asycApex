@@ -1,0 +1,21 @@
+@isTest
+public class LeadProcessorTest {
+    static testMethod void updateLeads() {
+        
+        Account acc = new Account(Name = 'Lead Acc');
+        insert acc;
+        List<Lead> leadsToInsert = new List<Lead>();
+        for (Integer i = 0; i< 200; i++) {
+            leadsToInsert.add(new Lead(LastName = 'Last '+i,Company = 'Company'));
+        }
+        insert leadsToInsert;
+        
+        Test.startTest();
+        Database.executeBatch(new LeadProcessor(), 200);
+        Test.stopTest();
+        
+        for(Lead l : [SELECT ID,LeadSource FROM LEAD]){
+            System.assertEquals('Dreamforce', l.LeadSource);
+        }
+    }
+}
